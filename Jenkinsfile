@@ -6,6 +6,9 @@ pipeline {
         DOCKER_USER = credentials('DOCKER_USER')
         IP_PRODU = credentials('IP_PRODUCCION')
         USER_PRODU = credentials('USER_PRODUCCION')
+        DB_USER = credentials('DB_USER').toString()
+        DB_PASSWORD = credentials('DB_PASSWORD').toString()
+    
     }
     
     stages {
