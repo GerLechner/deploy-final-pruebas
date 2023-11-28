@@ -26,13 +26,13 @@ def datos_participantes():
 
 @app.route('/index')
 @app.route('/')
-def index()asd:
+def index():
     participantes = datos_participantes()
     return render_template('index.html', participantes=participantes)
 
 @app.route('/participantes')
 def estudiantes():
-    return jsonify({'estudiantes': datos_participentes()})
+    return jsonify({'estudiantes': datos_participantes()})
 
 @app.route('/probando')
 def hola():
