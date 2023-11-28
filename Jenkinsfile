@@ -3,6 +3,9 @@ pipeline {
     
     environment {
         DOCKER_CREDENTIALS = credentials('DOCKER_CREDENTIALS')
+        DOCKER_USER = credentials('DOCKER_USER')
+        IP_PRODU = credentials('IP_PRODUCCION')
+        USER_PRODU = credentials('USER_PRODUCCION')
     }
     
     stages {
@@ -39,8 +42,8 @@ pipeline {
     
         stage('Push Docker Image') {
             steps {
-                sh "docker login -u glechner99 -p ${DOCKER_CREDENTIALS}"
-                sh "docker push glechner99/flask-app"
+                sh "docker login -u ${DOCKER_USER} -p ${DOCKER_CREDENTIALS}"
+                sh "docker push ${DOCKER_USER}/flask-app"
             }
         }
     
@@ -48,29 +51,26 @@ pipeline {
         stage('Deploy Kubernetes'){
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'IP_PRODUCCION', variable: 'IP_PRODU'), string(credentialsId: 'USER_PRODUCCION', variable: 'USER_PRODU')]) 
-                    {
-            
-                        def produccion = "${USER_PRODU}@${IP_PRODU}"
-                        
-                        sh "mkdir -p /$HOME/deploy-final"
-                        sh "scp -r Kubernetes ${produccion}:/$HOME/deploy-final"
-                        sh "ssh ${produccion} 'minikube start'"
-                        sh "ssh ${produccion} 'kubectl apply -f \$(printf \"%s,\" $HOME/deploy-final/*.yaml | sed \"s/,\$//\")'"
-                        sleep(time:4, unit: "SECONDS")
-                        sh "ssh ${produccion} 'minikube service app --url'"
-            
-                        
-                        def minikubeIp = sh(script:"ssh ${produccion} 'minikube ip'", returnStdout: true).trim()
-                        def puerto = sh(script:"ssh ${produccion} 'kubectl get service app --output='jsonpath={.spec.ports[0].nodePort}' --namespace=default'", returnStdout: true).trim()
-                        
-                        sh(script: "echo ssh -L 192.168.192.130:${puerto}:${minikubeIp}:${puerto}")
-                        
-                        //sh "ssh ${produccion} 'kubectl delete deployments,services app db'" 
-                        
-                        sh "ssh ${produccion} 'rm /$HOME/deploy-final/*.yaml'"
-                        sh "ssh ${produccion} 'rmdir /$HOME/deploy-final'"
-                    }
+                    
+                    def produccion = "${USER_PRODU}@${IP_PRODU}"
+                    
+                    sh "mkdir -p /$HOME/deploy-final"
+                    sh "scp -r Kubernetes ${produccion}:/$HOME/deploy-final"
+                    sh "ssh ${produccion} 'minikube start'"
+                    sh "ssh ${produccion} 'kubectl apply -f \$(printf \"%s,\" $HOME/deploy-final/*.yaml | sed \"s/,\$//\")'"
+                    sleep(time:4, unit: "SECONDS")
+                    sh "ssh ${produccion} 'minikube service app --url'"
+        
+                    def minikubeIp = sh(script:"ssh ${produccion} 'minikube ip'", returnStdout: true).trim()
+                    def puerto = sh(script:"ssh ${produccion} 'kubectl get service app --output='jsonpath={.spec.ports[0].nodePort}' --namespace=default'", returnStdout: true).trim()
+                    
+                    sh(script: "echo ssh -L 192.168.192.130:${puerto}:${minikubeIp}:${puerto}")
+                    
+                    //sh "ssh ${produccion} 'kubectl delete deployments,services app db'" 
+                    
+                    sh "ssh ${produccion} 'rm /$HOME/deploy-final/*.yaml'"
+                    sh "ssh ${produccion} 'rmdir /$HOME/deploy-final'"
+                
                 }
             }
         }
