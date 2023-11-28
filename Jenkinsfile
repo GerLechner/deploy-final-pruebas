@@ -37,11 +37,10 @@ pipeline {
                 script{
                     sh "docker start sonarqube"
                     sleep(time:60, unit: "SECONDS")
-                    withCredentials([string(credentialsId: 'USER_SONARQUBE', variable: 'USER_SONARQUBE'), string(credentialsId: 'PASS_SONARQUBE', variable: 'PASS_SONARQUBE')]){
-                        def scannerHome = tool name: 'SonarScanner'
-                        withSonarQubeEnv('SonarQubeServer') {
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=analisis-deploy-flask -Dsonar.scanner.config.file=sonar-project.properties -X"
-                        }
+                    
+                    def scannerHome = tool name: 'SonarScanner'
+                    withSonarQubeEnv('SonarQubeServer') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=analisis-deploy-flask -Dsonar.scanner.config.file=sonar-project.properties -X"   
                     }
                 }
             }
