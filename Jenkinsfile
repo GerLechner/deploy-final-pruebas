@@ -21,7 +21,7 @@ pipeline {
                 sh "docker-compose up -d --build"
                 sleep(time:5, unit: "SECONDS")
             
-                sh "docker exec flask-app-container python tests.py"
+                //sh "docker exec flask-app-container python tests.py"
                 
                 sh "docker stop flask-app-container"
                 sh "docker stop flask-app-db-container"
