@@ -40,13 +40,12 @@ pipeline {
                     withCredentials([string(credentialsId: 'USER_SONARQUBE', variable: 'USER_SONARQUBE'), string(credentialsId: 'PASS_SONARQUBE', variable: 'PASS_SONARQUBE')]){
                         def scannerHome = tool name: 'SonarScanner'
                         withSonarQubeEnv('SonarQubeServer') {
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${USER_SONARQUBE} -Dsonar.password=${PASS_SONARQUBE} -Dsonar.projectKey=analisis-deploy-flask -Dsonar.projectBaseDir=${WORKSPACE} -Dsonar.sources=app -Dsonar.exclusions=data/** -Dsonar.language=py -Dsonar.python.xunit.reportPath=test-reports/*.xml -X"
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${USER_SONARQUBE} -Dsonar.password=${PASS_SONARQUBE} -Dsonar.projectKey=myProject -Dsonar.scanner.config.file=sonar-project.properties -X"
                         }
                     }
                 }
             }
         }
-    
     
         stage('Build Docker Image'){
             steps {
