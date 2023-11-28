@@ -28,10 +28,6 @@ pipeline {
                 
                 sh "docker rm flask-app-container"
                 sh "docker rm flask-app-db-container"
-
-                sleep(time:10, unit: "SECONDS")
-                sh "sudo rm -rf data/*"
-                sh "sudo rmdir data"
                 
             }
         }
