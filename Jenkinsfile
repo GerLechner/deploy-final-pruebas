@@ -40,7 +40,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'USER_SONARQUBE', variable: 'USER_SONARQUBE'), string(credentialsId: 'PASS_SONARQUBE', variable: 'PASS_SONARQUBE')]){
                         def scannerHome = tool name: 'SonarScanner'
                         withSonarQubeEnv('SonarQubeServer') {
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${USER_SONARQUBE} -Dsonar.password=${PASS_SONARQUBE} -Dsonar.projectKey=myProject -Dsonar.scanner.config.file=sonar-project.properties -X"
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=analisis-deploy-flask -Dsonar.scanner.config.file=sonar-project.properties -X"
                         }
                     }
                 }
@@ -70,6 +70,7 @@ pipeline {
                     
                     sh "mkdir -p /$HOME/deploy-final"
                     sh "scp -r Kubernetes ${produccion}:/$HOME/deploy-final"
+                    sh "ssh ${produccion} 'sudo service docker restart'"
                     sh "ssh ${produccion} 'minikube start'"
                     sh "ssh ${produccion} 'kubectl apply -f \$(printf \"%s,\" $HOME/deploy-final/*.yaml | sed \"s/,\$//\")'"
                     sleep(time:4, unit: "SECONDS")
